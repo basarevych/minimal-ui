@@ -1,0 +1,15 @@
+{
+  "name": "minimal-ui",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "lint": "eslint . --max-warnings=0",
+    "test": "jest . --no-cache --forceExit",
+    "build": "sh ./bin/build.sh",
+    "start": "env NODE_ENV=production node ./server.js"
+  },
+  "dependencies": {
+    "express": "~4.16.4",
+    "ws": "~6.1.0"
+  }
+}
