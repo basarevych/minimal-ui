@@ -9,7 +9,7 @@ fi
 rm -rf ./dist
 mkdir ./dist
 cd front
-$pkg build 
+$pkg run build 
 cd ..
 cp -r front/build dist/front
 find ./dist -name '*.map' -delete
