@@ -1,54 +1,23 @@
 "use strict";
 
-const http = require("http");
+const WebSocket = require("ws");
 const path = require("path");
-const App = require("./api/app");
+const fs = require("fs");
 
 const root = path.join.bind(path, path.resolve(__dirname));
 process.chdir(root());
 
-let app = new App(root());
-let server = http.createServer(app.express);
-
-app
-  .init({ server })
-  .then(() => {
-    server.listen(app.config.appPort, app.config.appHost);
-    server.on("error", onError);
-    server.once("listening", onListening);
-  })
-  .catch(error => {
-    console.error(error);
-    process.exit(1);
-  });
-
-/**
- * Event listener for HTTP server "error" event.
- * @param {Error} error
- */
-function onError(error) {
-  if (error.syscall !== "listen") throw error;
-
-  // handle specific listen errors with friendly messages
-  switch (error.code) {
-    case "EACCES":
-      console.error(`Port ${app.config.appPort} requires elevated privileges`);
-      process.exit(1);
-      break;
-    case "EADDRINUSE":
-      console.error(`Port ${app.config.appPort} is already in use`);
-      process.exit(1);
-      break;
-    default:
-      throw error;
-  }
+let config;
+try {
+  config = require(root("config.js"));
+} catch (unused) {
+  config = require(root("config.js.example"));
 }
 
-/**
- * Event listener for HTTP server "listening" event.
- */
+fs.writeFileSync(
+  root("front", "config.json"),
+  JSON.stringify({ port: config.port })
+);
 
-function onListening() {
-  let address = server.address();
-  console.log(`> Server is listening on ${address.address}:${address.port}`);
-}
+const wss = new WebSocket.Server({ host: config.host, port: config.port });
+wss.on("connection", require("./api/ws").bind({}, config));
